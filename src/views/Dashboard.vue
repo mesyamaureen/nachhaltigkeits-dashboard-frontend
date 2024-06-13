@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
 import sidebarNav from '@/components/SidebarMenu.vue'
-import type dashboard from './components/cDashboard.vue'
+import type dashboard from '@/components/cDashboard.vue'
 </script>
 
 <template>
-  <sidebar-nav />
-  <RouterView />
+  <main>
+    <h1>Übersicht</h1>
+    <!-- <dashboard title="dashboard" /> -->
+  </main>
 </template>
 
 <style scoped>

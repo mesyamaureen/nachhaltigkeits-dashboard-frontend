@@ -1,26 +1,23 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import sidebarNav from '@/components/SidebarMenu.vue'
-import type dashboard from './components/cDashboard.vue'
+import type cRessourcenVue from '@/components/cRessourcen.vue'
 </script>
 
 <template>
-  <sidebar-nav />
-  <RouterView />
+  <main>
+    <h1>Ressourcen</h1>
+    <!-- <cRessourcenVue title="Ressourcen View" /> -->
+  </main>
 </template>
 
+<!-- Overrulled CSS -->
 <style scoped>
 header {
   line-height: 1.5;
   max-height: 100vh;
-  margin: 2rem 2rem 0 0;
+  margin: 2rem 2rem 0 2rem;
   width: 100%;
   display: flex;
   flex-direction: row;
-  padding-left: 175px;
-}
-.content {
-  padding-left: 175px;
 }
 
 .logo {
