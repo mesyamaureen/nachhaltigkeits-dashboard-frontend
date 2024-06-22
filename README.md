@@ -119,3 +119,5 @@ git add --a
 git commit -m "readme bearbeitet Neslihan"
 git push
 Überprüfung: git status
+
+ 
