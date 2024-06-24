@@ -5,8 +5,14 @@ import type dashboard from '@/components/cDashboard.vue'
 import { onMounted, ref } from 'vue';
 import axios from 'axios';
 import kpiBox from '@/components/kpiBox.vue'
-// TODO: umwandeln als List von Kennzahlen (Daten vom Backend)
+import AddKpiPopup from '@/components/AddKpiPopup.vue';
+import DeleteKpiPopup from '@/components/DeleteKpiPopup.vue';
+
 const kpis = ref([]);
+const showAddPopup = ref(false);
+const showDeletePopup = ref(false);
+const kpiToDelete = ref(null);
+
 onMounted(async () => {
   try {
     const response = await axios.get('http://localhost:8080/api/kpis');
@@ -16,17 +22,50 @@ onMounted(async () => {
     console.error('Error fetching kpis:', error);
   }
 });
-</script>
 
+const openAddPopup = () => {
+  console.log('Plus-Button clicked');  // Konsolenausgabe
+  showAddPopup.value = true;
+};
+
+const closeAddPopup = () => {
+  console.log('Close Add Popup');  // Konsolenausgabe
+  showAddPopup.value = false;
+};
+
+const addKpi = (newKpi) => {
+  console.log('Added KPI:', newKpi);  // Konsolenausgabe
+  kpis.value.push(newKpi);
+};
+
+const confirmDeleteKpi = (index) => {
+  kpiToDelete.value = index;
+  showDeletePopup.value = true;
+};
+
+const deleteKpi = async () => {
+  if (kpiToDelete.value !== null) {
+    try {
+      await axios.delete(`http://localhost:8080/api/kpis/${kpis.value[kpiToDelete.value].id}`);
+      kpis.value.splice(kpiToDelete.value, 1);
+      console.log('Deleted KPI:', kpiToDelete.value);  // Konsolenausgabe
+    } catch (error) {
+      console.error('Error deleting kpi:', error);
+    }
+  }
+  showDeletePopup.value = false;
+  kpiToDelete.value = null;
+};
+</script>
 
 <template>
   <main class="content">
     <div class="title">
       <h1>Übersicht</h1>
-      <button class="circle-button" @click="$emit('click')">+</button>
+      <button class="circle-button" @click="openAddPopup">+</button>
     </div>
     <div class="items">
-      <kpiBox v-for="(kpi, index) in kpis" :key="index">
+      <kpiBox v-for="(kpi, index) in kpis" :key="index" :index="index" @delete="confirmDeleteKpi">
         <template #icon>
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -46,6 +85,8 @@ onMounted(async () => {
         <p>{{ kpi.co2 }}</p>
       </kpiBox>
     </div>
+    <AddKpiPopup :show="showAddPopup" @close="closeAddPopup" @added="addKpi" />
+    <DeleteKpiPopup :show="showDeletePopup" :kpiName="kpis[kpiToDelete]?.name" @confirm="deleteKpi" @close="() => showDeletePopup.value = false" />
   </main>
 </template>
 

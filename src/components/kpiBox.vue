@@ -1,17 +1,33 @@
 <template>
- <div class="dashboard-item">
-   <div class="dashboard-item__content">
-     <h3 class="dashboard-item__heading">
-       <slot name="heading" />
-     </h3>
-     <p class="dashboard-item__description">
-       <slot />
-       <!-- This is the default slot -->
-     </p>
-   </div>
-   <button class="dashboard-item__button" @click="$emit('click')">X</button>
- </div>
-</template>
+  <div class="dashboard-item">
+    <div class="dashboard-item__content">
+      <h3 class="dashboard-item__heading">
+        <slot name="heading" />
+      </h3>
+      <p class="dashboard-item__description">
+        <slot />
+        <!-- This is the default slot -->
+      </p>
+    </div>
+    <button class="dashboard-item__button" @click="handleClick">X</button>
+  </div>
+ </template>
+ 
+ <script>
+ export default {
+   props: {
+     index: {
+       type: Number,
+       required: true
+     }
+   },
+   methods: {
+     handleClick() {
+       this.$emit('delete', this.index);
+     }
+   }
+ };
+ </script>
 
 
 <style scoped>
