@@ -2,40 +2,58 @@
 import { RouterLink, RouterView } from 'vue-router'
 import sidebarNav from '@/components/SidebarMenu.vue'
 import type dashboard from '@/components/cDashboard.vue'
+import { ref, onMounted } from 'vue';
+import { fetchKpi } from '@/api/api.js';
 import kpiBox from '@/components/kpiBox.vue'
-import AddKpiPopup from '@/components/AddKpiPopup.vue';
-import { ref } from 'vue';
-import axios from 'axios';
 
 
+const kpi = ref([]);
 
-// Angenommen, die ID des aktuellen Dashboards wird als Prop oder aus einem globalen Zustand abgerufen
-const dashboardId = ref(1); // Ersetzen Sie dies durch die tatsächliche Methode zum Abrufen der Dashboard-ID
-
-const showAddKpiPopup = ref(false);
-
-const addKpisToDashboard = async (selectedKpiId) => {
+const loadKpi = async () => {
   try {
-    const response = await axios.post(`http://localhost:8080/api/kpi/${dashboardId.value}`, selectedKpiId);
-    // Fügen Sie die neu hinzugefügte KPI zur Liste der Dashboard-KPIs hinzu
-    const addedKpi = response.data.kpis.find(kpi => kpi.id === selectedKpiId);
-    if (addedKpi) {
-      dashboardKpis.value.push(addedKpi);
-    }
-    showAddKpiPopup.value = false;
+    kpi.value = await fetchKpi();
   } catch (error) {
-    console.error("Fehler beim Hinzufügen von KPIs zum Dashboard:", error);
+    console.error('Failed to load kpis:', error);
   }
 };
+
+onMounted(() => {
+  loadKpi();
+});
+
 </script>
 
+
 <template>
-  <div>
-    <button class="circle-button" @click="showAddKpiPopup = true">+</button>
-    <AddKpiPopup :show="showAddKpiPopup" @close="showAddKpiPopup = false" @confirm="addKpisToDashboard" />
-    <!-- Rest des Dashboards -->
-  </div>
-</template>
+  <main class="content">
+    <div class="title">
+      <h1>Übersicht</h1>
+      <button class="circle-button" @click="$emit('click')">+</button>
+    </div>
+ 
+    <div class="items">
+      <kpiBox v-for="(kpi, index) in kpi" :key="index">
+        <template #icon>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+            />
+          </svg>
+        </template>
+        <template #heading>{{ kpi.name }}</template>
+        <p>{{ kpi.co2 }}</p>
+      </kpiBox>
+    </div>
+  </main>
+ </template>
 
 
 <style scoped>
