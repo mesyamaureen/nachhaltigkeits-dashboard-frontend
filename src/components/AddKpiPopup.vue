@@ -54,6 +54,7 @@ const confirmSelection = () => {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000; /* Ensure the popup is in the foreground */
 }
 
 .popup-content {

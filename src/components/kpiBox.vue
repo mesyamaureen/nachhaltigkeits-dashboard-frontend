@@ -1,70 +1,72 @@
 <template>
-  <div class="dashboard-item">
+  <div class="dashboard-item" :class="{ 'hidden': !kpi.visible }">
     <div class="dashboard-item__content">
       <h3 class="dashboard-item__heading">
         <slot name="heading" />
       </h3>
-      <p class="dashboard-item__description">
-        <slot />
-        <!-- This is the default slot -->
-      </p>
+      <div class="dashboard-item__description">
+        <slot name="content" />
+      </div>
     </div>
     <button class="dashboard-item__button" @click="$emit('toggle-visibility')">X</button>
   </div>
- </template>
- 
- 
- <style scoped>
- .dashboard-item {
+</template>
+
+<script setup lang="ts">
+defineProps({
+  kpi: Object
+});
+</script>
+
+<style scoped>
+.dashboard-item {
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   width: 30%;
+  height: 200px; /* Fix height for all cards */
   margin-top: 2rem;
   border: 2px solid grey;
   border-radius: 2px;
   box-sizing: border-box;
-  padding: 1rem; /* Add padding to ensure content is not flush against the border */
- }
- 
- 
- .dashboard-item__content {
+  padding: 1rem;
+  visibility: visible;
+  transition: visibility 0.3s, opacity 0.3s;
+}
+
+.dashboard-item.hidden {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.dashboard-item__content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: flex-end; /* Align content to the right */
-  justify-content: space-between;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   margin-left: 1rem;
   margin-right: 1rem;
   padding-right: 2rem;
   padding-top: 2rem;
- }
- 
- 
- .dashboard-item__heading,
- .dashboard-item__description {
-  text-align: right; /* Right justify the text inside the content */
-  width: 100%;
- }
- 
- 
- .dashboard-item__heading {
-  font-size: 1.1rem;
-  font-weight: 500;
+}
+
+.dashboard-item__heading {
+  font-size: 1.5rem; /* Increase font size */
+  font-weight: bold; /* Bold text */
   margin-bottom: 0.4rem;
   color: var(--color-heading);
- }
- 
- 
- .dashboard-item__description {
+}
+
+.dashboard-item__description {
   font-size: large;
   font-weight: 300;
   color: var(--color-text);
- }
- 
- 
- .dashboard-item__button {
+}
+
+.dashboard-item__button {
   position: absolute;
   top: 0;
   right: 0;
@@ -74,16 +76,14 @@
   padding: 0.5rem;
   border-radius: 2px;
   cursor: pointer;
- }
- 
- 
- @media (min-width: 1024px) {
+}
+
+@media (min-width: 1024px) {
   .dashboard-item {
     margin-top: 0;
     padding: 0.4rem 0 1rem 2rem;
   }
- 
- 
+
   .dashboard-item__icon {
     top: calc(50% - 25px);
     left: -26px;
@@ -94,6 +94,5 @@
     width: 50px;
     height: 50px;
   }
- }
- </style>
- 
+}
+</style>
