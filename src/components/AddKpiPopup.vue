@@ -1,4 +1,3 @@
-<!-- src/components/AddKpiPopup.vue -->
 <template>
   <div class="popup-overlay" v-if="show">
     <div class="popup-content">
@@ -7,7 +6,7 @@
       <div class="form-group">
         <label for="kpi-select">Wählen Sie eine KPI aus:</label>
         <select id="kpi-select" v-model="selectedKpi">
-          <option v-for="kpi in kpis" :key="kpi.id" :value="kpi.id">
+          <option v-for="kpi in kpi" :key="kpi.id" :value="kpi.id">
             {{ kpi.name }}
           </option>
         </select>
@@ -19,17 +18,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import { ref } from 'vue';
 import { defineProps, defineEmits } from 'vue';
 
 const props = defineProps({
   show: Boolean,
+  kpi: Array
 });
 
 const emits = defineEmits(['close', 'confirm']);
 
-const kpis = ref([]);
 const selectedKpi = ref(null);
 
 const closePopup = () => {
@@ -43,15 +41,6 @@ const confirmSelection = () => {
     alert('Bitte wählen Sie eine KPI aus.');
   }
 };
-
-onMounted(async () => {
-  try {
-    const response = await axios.get('http://localhost:8080/api/kpis');
-    kpis.value = response.data;
-  } catch (error) {
-    console.error("Fehler beim Abrufen der KPIs:", error);
-  }
-});
 </script>
 
 <style scoped>
@@ -101,7 +90,8 @@ onMounted(async () => {
   box-sizing: border-box;
 }
 
-.confirm-button, .cancel-button {
+.confirm-button,
+.cancel-button {
   background-color: #007bff;
   color: white;
   border: none;
