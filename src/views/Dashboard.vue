@@ -2,92 +2,39 @@
 import { RouterLink, RouterView } from 'vue-router'
 import sidebarNav from '@/components/SidebarMenu.vue'
 import type dashboard from '@/components/cDashboard.vue'
-import { onMounted, ref } from 'vue';
-import axios from 'axios';
 import kpiBox from '@/components/kpiBox.vue'
 import AddKpiPopup from '@/components/AddKpiPopup.vue';
-import DeleteKpiPopup from '@/components/DeleteKpiPopup.vue';
+import { ref } from 'vue';
+import axios from 'axios';
 
-const kpis = ref([]);
-const showAddPopup = ref(false);
-const showDeletePopup = ref(false);
-const kpiToDelete = ref(null);
 
-onMounted(async () => {
+
+// Angenommen, die ID des aktuellen Dashboards wird als Prop oder aus einem globalen Zustand abgerufen
+const dashboardId = ref(1); // Ersetzen Sie dies durch die tatsächliche Methode zum Abrufen der Dashboard-ID
+
+const showAddKpiPopup = ref(false);
+
+const addKpisToDashboard = async (selectedKpiId) => {
   try {
-    const response = await axios.get('http://localhost:8080/api/kpis');
-    console.log('Fetched KPIs:', response.data);  // Konsolenausgabe der Daten
-    kpis.value = response.data;
-  } catch (error) {
-    console.error('Error fetching kpis:', error);
-  }
-});
-
-const openAddPopup = () => {
-  console.log('Plus-Button clicked');  // Konsolenausgabe
-  showAddPopup.value = true;
-};
-
-const closeAddPopup = () => {
-  console.log('Close Add Popup');  // Konsolenausgabe
-  showAddPopup.value = false;
-};
-
-const addKpi = (newKpi) => {
-  console.log('Added KPI:', newKpi);  // Konsolenausgabe
-  kpis.value.push(newKpi);
-};
-
-const confirmDeleteKpi = (index) => {
-  kpiToDelete.value = index;
-  showDeletePopup.value = true;
-};
-
-const deleteKpi = async () => {
-  if (kpiToDelete.value !== null) {
-    try {
-      await axios.delete(`http://localhost:8080/api/kpis/${kpis.value[kpiToDelete.value].id}`);
-      kpis.value.splice(kpiToDelete.value, 1);
-      console.log('Deleted KPI:', kpiToDelete.value);  // Konsolenausgabe
-    } catch (error) {
-      console.error('Error deleting kpi:', error);
+    const response = await axios.post(`http://localhost:8080/api/kpi/${dashboardId.value}`, selectedKpiId);
+    // Fügen Sie die neu hinzugefügte KPI zur Liste der Dashboard-KPIs hinzu
+    const addedKpi = response.data.kpis.find(kpi => kpi.id === selectedKpiId);
+    if (addedKpi) {
+      dashboardKpis.value.push(addedKpi);
     }
+    showAddKpiPopup.value = false;
+  } catch (error) {
+    console.error("Fehler beim Hinzufügen von KPIs zum Dashboard:", error);
   }
-  showDeletePopup.value = false;
-  kpiToDelete.value = null;
 };
 </script>
 
 <template>
-  <main class="content">
-    <div class="title">
-      <h1>Übersicht</h1>
-      <button class="circle-button" @click="openAddPopup">+</button>
-    </div>
-    <div class="items">
-      <kpiBox v-for="(kpi, index) in kpis" :key="index" :index="index" @delete="confirmDeleteKpi">
-        <template #icon>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-            />
-          </svg>
-        </template>
-        <template #heading>{{ kpi.name }}</template>
-        <p>{{ kpi.co2 }}</p>
-      </kpiBox>
-    </div>
-    <AddKpiPopup :show="showAddPopup" @close="closeAddPopup" @added="addKpi" />
-    <DeleteKpiPopup :show="showDeletePopup" :kpiName="kpis[kpiToDelete]?.name" @confirm="deleteKpi" @close="() => showDeletePopup.value = false" />
-  </main>
+  <div>
+    <button class="circle-button" @click="showAddKpiPopup = true">+</button>
+    <AddKpiPopup :show="showAddKpiPopup" @close="showAddKpiPopup = false" @confirm="addKpisToDashboard" />
+    <!-- Rest des Dashboards -->
+  </div>
 </template>
 
 
@@ -101,9 +48,11 @@ header {
  flex-direction: row;
 }
 
+
 .content {
  padding-left: 175px;
 }
+
 
 .items {
  display: flex;
@@ -112,11 +61,13 @@ header {
  margin-top: 2rem;
 }
 
+
 .logo {
  display: flex;
  place-items: center;
  margin: 0 0 0 0;
 }
+
 
 nav {
  width: 100%;
@@ -125,13 +76,16 @@ nav {
  margin-top: 2rem;
 }
 
+
 nav a.router-link-exact-active {
  color: var(--color-text);
 }
 
+
 nav a.router-link-exact-active:hover {
  background-color: #ffffff;
 }
+
 
 nav a {
  display: inline-block;
@@ -139,9 +93,11 @@ nav a {
  border-left: 1px solid var(--color-border);
 }
 
+
 nav a:first-of-type {
  border: 0;
 }
+
 
 @media (min-width: 1024px) {
  header {
@@ -152,11 +108,13 @@ nav a:first-of-type {
    width: fit-content;
  }
 
+
  .logo {
    margin: 2rem 1rem 0 0;
    display: flex;
    place-items: center;
  }
+
 
  header .wrapper {
    display: flex;
@@ -164,6 +122,7 @@ nav a:first-of-type {
    flex-wrap: wrap;
    flex-direction: column;
  }
+
 
  nav {
    text-align: end;
@@ -175,7 +134,6 @@ nav a:first-of-type {
    margin-top: 1rem;
  }
 }
-
 .circle-button {
  display: flex;
  justify-content: center;
@@ -197,12 +155,15 @@ nav a:first-of-type {
  right: 20px;
 }
 
+
 .circle-button:hover {
  background-color: #0056b3; /* Change to desired hover color */
  transform: scale(1.1);
 }
 
+
 .circle-button:active {
  transform: scale(0.9);
 }
 </style>
+
