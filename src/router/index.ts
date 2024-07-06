@@ -4,6 +4,7 @@ import Ressourcen from '@/views/Ressourcen.vue'
 import Pipelines from '@/views/Pipeline.vue'
 import Code from '@/views/Code.vue'
 import Organisatorisch from '@/views/Organisatorisch.vue'
+import Phase from '@/views/Phase.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -32,6 +33,11 @@ const router = createRouter({
       path: '/organisatorisch',
       name: 'Organisatorisch',
       component: Organisatorisch
+    },
+    {
+      path: '/phase',
+      name: 'Phase',
+      component: Phase
     }
   ]
 })
