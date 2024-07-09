@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboard-item" :class="{ 'hidden': !kpi.visible }">
+  <div class="dashboard-item" :class="{ hidden: !kpi.visible }" @click="openPhaseView">
     <div class="dashboard-item__content">
       <h3 class="dashboard-item__heading">
         <slot name="heading" />
@@ -12,10 +12,18 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts">
 defineProps({
   kpi: Object
-});
+})
+
+export default {
+  methods: {
+    openPhaseView() {
+      this.$router.push({ name: 'Phase' })
+    }
+  }
+}
 </script>
 
 <style scoped>
@@ -32,7 +40,9 @@ defineProps({
   box-sizing: border-box;
   padding: 1rem;
   visibility: visible;
-  transition: visibility 0.3s, opacity 0.3s;
+  transition:
+    visibility 0.3s,
+    opacity 0.3s;
 }
 
 .dashboard-item.hidden {
