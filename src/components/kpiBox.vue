@@ -13,17 +13,7 @@
 </template>
 
 <script lang="ts">
-defineProps({
-  kpi: Object
-})
 
-export default {
-  methods: {
-    openPhaseView() {
-      this.$router.push({ name: 'Phase' })
-    }
-  }
-}
 </script>
 
 <style scoped>
