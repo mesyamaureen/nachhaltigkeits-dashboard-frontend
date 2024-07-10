@@ -4,13 +4,18 @@
     <div class="content">
       <h1>Planungsphase</h1>
       <!-- Glue kleine Kachel Component here -->
+      <Chart />
     </div>
   </div>
 </template>
 
 <script lang="ts">
+import Chart from '@/components/phase/chart.vue'
 export default {
-  name: 'Phase'
+  name: 'Phase',
+  components: {
+    Chart
+  }
 }
 </script>
 
