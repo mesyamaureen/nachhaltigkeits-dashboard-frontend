@@ -1,3 +1,15 @@
+<script lang="ts">
+import Chart from '@/components/phase/chart.vue'
+
+export default {
+  name: 'Phase',
+  components: {
+    Chart
+  }
+}
+
+</script>
+
 <template>
   <div>
     <!-- Your view content here -->
@@ -9,15 +21,6 @@
   </div>
 </template>
 
-<script lang="ts">
-import Chart from '@/components/phase/chart.vue'
-export default {
-  name: 'Phase',
-  components: {
-    Chart
-  }
-}
-</script>
 
 <style>
 .content {
