@@ -13,6 +13,23 @@
 </template>
 
 <script lang="ts">
+// defineProps({
+//   kpi: Object
+// });
+
+export default {
+  props: {
+          kpi: {
+            type: Object,
+            required: true
+          }
+        },
+  methods: {
+    openPhaseView() {
+      this.$router.push({ name: 'Phase' })
+    }
+  }
+}
 
 </script>
 

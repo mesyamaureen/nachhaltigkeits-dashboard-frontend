@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+// @ts-ignore
 import { fetchKpi } from '@/api/api.js';
 import kpiBox from '@/components/kpiBox.vue'
 import AddKpiPopup from '@/components/AddKpiPopup.vue';
 
-const kpi = ref([]);
+const kpi: any = ref([]);
 const showPopup = ref(false);
 
 const openPopup = () => {
@@ -18,8 +19,8 @@ const closePopup = () => {
 const loadKpi = async () => {
   try {
     const fetchedKpi = await fetchKpi();
-    kpi.value = fetchedKpi.map(kpiItem => ({ ...kpiItem, visible: true }));
-    kpi.value.forEach(kpiItem => {
+    kpi.value = fetchedKpi.map((kpiItem: any) => ({ ...kpiItem, visible: true }));
+    kpi.value.forEach((kpiItem: any) => {
       console.log(`KPI ID: ${kpiItem.id}, Visible: ${kpiItem.visible}`); // Debugging-Ausgabe
     });
   } catch (error) {
@@ -27,15 +28,15 @@ const loadKpi = async () => {
   }
 };
 
-const toggleKpiVisibility = (kpiId) => {
-  const kpiItem = kpi.value.find(kpi => kpi.id === kpiId);
+const toggleKpiVisibility = (kpiId: any) => {
+  const kpiItem: any = kpi.value.find((kpi: any) => kpi.id === kpiId);
   if (kpiItem) {
     kpiItem.visible = !kpiItem.visible;
     console.log(`KPI ID: ${kpiId}, Visible: ${kpiItem.visible}`); // Debugging-Ausgabe
   }
 };
 
-const confirmSelection = (kpiId) => {
+const confirmSelection = (kpiId: any) => {
   toggleKpiVisibility(kpiId);
   closePopup();
 };
@@ -52,7 +53,7 @@ onMounted(() => {
       <button class="circle-button" @click="openPopup">+</button>
     </div>
 
-    <AddKpiPopup :show="showPopup" :kpi="kpi.filter(kpiItem => !kpiItem.visible)" @close="closePopup" @confirm="confirmSelection" />
+    <AddKpiPopup :show="showPopup" :kpi="kpi.filter((kpiItem: any) => !kpiItem.visible)" @close="closePopup" @confirm="confirmSelection" />
 
     <div class="items">
       <kpiBox
