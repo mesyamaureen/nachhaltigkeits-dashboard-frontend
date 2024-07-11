@@ -9,7 +9,7 @@
         <slot name="content" />
       </div>
     </div>
-    <button class="dashboard-item__button" @click.stop="$emit('toggle-visibility')">X</button>
+    <button class="dashboard-item__button" @click.stop="$emit('remove-kpi', kpi.id)">X</button>
   </div>
   </div>
 </template>
@@ -58,7 +58,7 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  width: 30%;
+  width: 450px;
   height: 200px; /* Fix height for all cards */
   margin-top: 2rem;
   border: 0.5px solid;

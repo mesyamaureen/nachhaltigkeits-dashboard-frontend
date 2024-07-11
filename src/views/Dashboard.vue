@@ -1,11 +1,42 @@
+<template>
+  <main class="content">
+    <div class="title">
+      <h1>Übersicht</h1>
+      <button class="circle-button" @click="openPopup">+</button>
+    </div>
+
+    <AddKpiPopup :show="showPopup" :kpi="availableKpi" @close="closePopup" @confirm="confirmSelection" />
+
+    <div class="items">
+      <kpiBox
+        v-for="(kpiItem, index) in kpi"
+        :key="index"
+        :kpi="kpiItem"
+        @remove-kpi="removeKpi(kpiItem.id)">
+        <template #heading>{{ kpiItem.name }}</template>
+        <template #content>
+          {{ kpiItem.co2 }} Co² Verbrauch
+        </template>
+      </kpiBox>
+    </div>
+  </main>
+</template>
+
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 // @ts-ignore
 import { fetchKpi } from '@/api/api.js';
-import kpiBox from '@/components/kpiBox.vue'
+import kpiBox from '@/components/kpiBox.vue';
 import AddKpiPopup from '@/components/AddKpiPopup.vue';
 
-const kpi: any = ref([]);
+interface Kpi {
+  id: number;
+  name: string;
+  co2: number;
+}
+
+const kpi = ref<Kpi[]>([]);
+const allKpi = ref<Kpi[]>([]);
 const showPopup = ref(false);
 
 const openPopup = () => {
@@ -19,56 +50,50 @@ const closePopup = () => {
 const loadKpi = async () => {
   try {
     const fetchedKpi = await fetchKpi();
-    kpi.value = fetchedKpi.map((kpiItem: any) => ({ ...kpiItem, visible: true }));
-    kpi.value.forEach((kpiItem: any) => {
-      console.log(`KPI ID: ${kpiItem.id}, Visible: ${kpiItem.visible}`); // Debugging-Ausgabe
-    });
+    allKpi.value = fetchedKpi.map((kpiItem: Kpi) => ({ ...kpiItem }));
+    loadSelectedKpi();
   } catch (error) {
     console.error('Failed to load KPIs:', error);
   }
 };
 
-const toggleKpiVisibility = (kpiId: any) => {
-  const kpiItem: any = kpi.value.find((kpi: any) => kpi.id === kpiId);
-  if (kpiItem) {
-    kpiItem.visible = !kpiItem.visible;
-    console.log(`KPI ID: ${kpiId}, Visible: ${kpiItem.visible}`); // Debugging-Ausgabe
+const loadSelectedKpi = () => {
+  const selectedKpiIds = JSON.parse(localStorage.getItem('selectedKpi') || '[]');
+  const selectedKpi = allKpi.value.filter((kpiItem: Kpi) => selectedKpiIds.includes(kpiItem.id));
+  // Sortiere die ausgewählten KPIs nach ID, um eine konsistente Reihenfolge zu gewährleisten
+  selectedKpi.sort((a, b) => selectedKpiIds.indexOf(a.id) - selectedKpiIds.indexOf(b.id));
+  kpi.value = selectedKpi;
+};
+
+const saveSelectedKpi = () => {
+  const selectedKpiIds = kpi.value.map((kpiItem: Kpi) => kpiItem.id);
+  localStorage.setItem('selectedKpi', JSON.stringify(selectedKpiIds));
+};
+
+const removeKpi = (kpiId: number) => {
+  kpi.value = kpi.value.filter((kpiItem: Kpi) => kpiItem.id !== kpiId);
+  saveSelectedKpi();
+  console.log(`KPI ID: ${kpiId} removed`); // Debugging-Ausgabe
+};
+
+const confirmSelection = (kpiId: number) => {
+  const selectedKpi = allKpi.value.find((kpiItem: Kpi) => kpiItem.id === kpiId);
+  if (selectedKpi) {
+    kpi.value.push(selectedKpi);
+    saveSelectedKpi();
+    closePopup();
   }
 };
 
-const confirmSelection = (kpiId: any) => {
-  toggleKpiVisibility(kpiId);
-  closePopup();
-};
+const availableKpi = computed(() => {
+  const selectedIds = kpi.value.map((kpiItem: Kpi) => kpiItem.id);
+  return allKpi.value.filter((kpiItem: Kpi) => !selectedIds.includes(kpiItem.id));
+});
 
 onMounted(() => {
   loadKpi();
 });
 </script>
-
-<template>
-  <main class="content">
-    <div class="title">
-      <h1>Übersicht</h1>
-      <button class="circle-button" @click="openPopup">+</button>
-    </div>
-
-    <AddKpiPopup :show="showPopup" :kpi="kpi.filter((kpiItem: any) => !kpiItem.visible)" @close="closePopup" @confirm="confirmSelection" />
-
-    <div class="items">
-      <kpiBox
-        v-for="(kpiItem, index) in kpi"
-        :key="index"
-        :kpi="kpiItem"
-        @toggle-visibility="toggleKpiVisibility(kpiItem.id)">
-        <template #heading>{{ kpiItem.name }}</template>
-        <template #content>
-          {{ kpiItem.co2 }} Co² Verbrauch
-        </template>
-      </kpiBox>
-    </div>
-  </main>
-</template>
 
 <style scoped>
 header {
