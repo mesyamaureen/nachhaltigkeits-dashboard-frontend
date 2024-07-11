@@ -1,6 +1,7 @@
 <template>
   <div>
     <button class="circle-button" @click="showPopup = true">+</button>
+    <div class="charts-container">
     <div v-for="(chart, index) in charts" :key="index" class="chart-item">
       <div class="chart-item__content">
         <h3 class="chart-item__heading">{{ chart.heading }}</h3>
@@ -13,6 +14,7 @@
       </div>
       <button class="chart-item__button" @click="removeChart(index)">X</button>
     </div>
+  </div>
     <AddChartPopup v-if="showPopup" @close="showPopup = false" @add-chart="addChart" />
   </div>
 </template>
@@ -89,6 +91,13 @@ export default {
 </script>
 
 <style scoped>
+
+.charts-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3rem; /* Optional: Adds space between chart items */
+}
+
 .chart-item {
   position: relative;
   display: flex;
@@ -102,9 +111,7 @@ export default {
   box-sizing: border-box;
   padding: 1rem;
   visibility: visible;
-  transition:
-    visibility 0.3s,
-    opacity 0.3s;
+  transition: visibility 0.3s, opacity 0.3s;
 }
 
 .chart-item.hidden {
