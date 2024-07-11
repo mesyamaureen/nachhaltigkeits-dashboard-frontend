@@ -1,6 +1,7 @@
 <template>
-  <div class="dashboard-item" :class="{ hidden: !kpi.visible }" @click="openPhaseView">
-    <div class="dashboard-item__content" :class="co2Class">
+  <div :class="['dashboard-item', co2Class]" @click="openPhaseView">
+    <div :class="{ hidden: !kpi.visible }">
+    <div class="dashboard-item__content">
       <h3 class="dashboard-item__heading">
         <slot name="heading" />
       </h3>
@@ -8,7 +9,8 @@
         <slot name="content" />
       </div>
     </div>
-    <button class="dashboard-item__button" @click="$emit('toggle-visibility')">X</button>
+    <button class="dashboard-item__button" @click.stop="$emit('toggle-visibility')">X</button>
+  </div>
   </div>
 </template>
 
@@ -29,10 +31,14 @@ export default {
   },
   setup(props) {
     const co2Class = computed(() => {
-      if (props.kpi.co2 < 150) {
+      console.log('aaaaCO2:', props.kpi.co2);
+      
+      if (props.kpi.co2 > 0 && props.kpi.co2 < 150) {
         return 'green';
-      } else if (props.kpi.co2 >= 150 && props.kpi.co2 < 800) {
+      } else if (props.kpi.co2 >= 150 && props.kpi.co2 < 300) {
         return 'yellow';
+      } else if (props.kpi.co2 <= 0) {
+        return 'grey';
       } else {
         return 'red';
       }
@@ -55,8 +61,8 @@ export default {
   width: 30%;
   height: 200px; /* Fix height for all cards */
   margin-top: 2rem;
-  border: 2px solid grey;
-  border-radius: 2px;
+  border: 0.5px solid;
+  border-radius: 10px;
   box-sizing: border-box;
   padding: 1rem;
   visibility: visible;
@@ -68,6 +74,29 @@ export default {
 .dashboard-item.hidden {
   visibility: hidden;
   opacity: 0;
+}
+.green {
+  background-color: #BFE3A9;
+  border-color: #BFE3A9;
+  /* color: white; */
+}
+
+.yellow {
+  background-color: #FFD378;
+  border-color: #FFD378;
+  /* color: black; */
+}
+
+.red {
+  background-color: #FF8A84;
+  border-color: #FF8A84;
+  /* color: white; */
+}
+
+.grey {
+  background-color: #EEEFEE;
+  border-color: #EEEFEE;
+  /* color: white; */
 }
 
 .dashboard-item__content {
@@ -81,21 +110,6 @@ export default {
   margin-right: 1rem;
   padding-right: 2rem;
   padding-top: 2rem;
-}
-
-.green .dashboard-item__content {
-  background-color: green;
-  color: white;
-}
-
-.yellow .dashboard-item__content {
-  background-color: yellow;
-  color: black;
-}
-
-.red .dashboard-item__content {
-  background-color: red;
-  color: white;
 }
 
 .dashboard-item__heading {
@@ -115,8 +129,9 @@ export default {
   position: absolute;
   top: 0;
   right: 0;
-  background: var(--color-background);
-  color: var(--color-text);
+  background: inherit;
+  color: black;
+  font-style: oblique;
   border: 0;
   padding: 0.5rem;
   border-radius: 2px;
