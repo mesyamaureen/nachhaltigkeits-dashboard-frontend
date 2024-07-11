@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type cRessourcenVue from '@/components/cRessourcen.vue'
+import type cRessourcenVue from '@/components/menü/cRessourcen.vue'
 </script>
 
 <template>
