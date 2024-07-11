@@ -33,9 +33,9 @@ export default {
     const co2Class = computed(() => {
       console.log('aaaaCO2:', props.kpi.co2);
       
-      if (props.kpi.co2 > 0 && props.kpi.co2 < 150) {
+      if (props.kpi.co2 > 0 && props.kpi.co2 < 300) {
         return 'green';
-      } else if (props.kpi.co2 >= 150 && props.kpi.co2 < 300) {
+      } else if (props.kpi.co2 >= 300 && props.kpi.co2 < 500) {
         return 'yellow';
       } else if (props.kpi.co2 <= 0) {
         return 'grey';
