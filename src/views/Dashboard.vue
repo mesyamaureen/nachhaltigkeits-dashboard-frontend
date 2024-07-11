@@ -59,7 +59,10 @@ const loadKpi = async () => {
 
 const loadSelectedKpi = () => {
   const selectedKpiIds = JSON.parse(localStorage.getItem('selectedKpi') || '[]');
-  kpi.value = allKpi.value.filter((kpiItem: Kpi) => selectedKpiIds.includes(kpiItem.id));
+  const selectedKpi = allKpi.value.filter((kpiItem: Kpi) => selectedKpiIds.includes(kpiItem.id));
+  // Sortiere die ausgewählten KPIs nach ID, um eine konsistente Reihenfolge zu gewährleisten
+  selectedKpi.sort((a, b) => selectedKpiIds.indexOf(a.id) - selectedKpiIds.indexOf(b.id));
+  kpi.value = selectedKpi;
 };
 
 const saveSelectedKpi = () => {
