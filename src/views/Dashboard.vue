@@ -5,7 +5,7 @@ import { fetchKpi } from '@/api/api.js';
 import kpiBox from '@/components/kpiBox.vue'
 import AddKpiPopup from '@/components/AddKpiPopup.vue';
 
-const kpi: any = ref([]);
+const kpi = ref([]);
 const showPopup = ref(false);
 
 const openPopup = () => {
@@ -19,26 +19,26 @@ const closePopup = () => {
 const loadKpi = async () => {
   try {
     const fetchedKpi = await fetchKpi();
-    kpi.value = fetchedKpi.map((kpiItem: any) => ({ ...kpiItem, visible: true }));
+    kpi.value = fetchedKpi.map((kpiItem: any) => ({ ...kpiItem }));
     kpi.value.forEach((kpiItem: any) => {
-      console.log(`KPI ID: ${kpiItem.id}, Visible: ${kpiItem.visible}`); // Debugging-Ausgabe
+      console.log(`KPI ID: ${kpiItem.id}`); // Debugging-Ausgabe
     });
   } catch (error) {
     console.error('Failed to load KPIs:', error);
   }
 };
 
-const toggleKpiVisibility = (kpiId: any) => {
-  const kpiItem: any = kpi.value.find((kpi: any) => kpi.id === kpiId);
-  if (kpiItem) {
-    kpiItem.visible = !kpiItem.visible;
-    console.log(`KPI ID: ${kpiId}, Visible: ${kpiItem.visible}`); // Debugging-Ausgabe
-  }
+const removeKpi = (kpiId: any) => {
+  kpi.value = kpi.value.filter((kpi: any) => kpi.id !== kpiId);
+  console.log(`KPI ID: ${kpiId} removed`); // Debugging-Ausgabe
 };
 
 const confirmSelection = (kpiId: any) => {
-  toggleKpiVisibility(kpiId);
-  closePopup();
+  const selectedKpi = kpi.value.find((kpi: any) => kpi.id === kpiId);
+  if (selectedKpi) {
+    kpi.value.push(selectedKpi);
+    closePopup();
+  }
 };
 
 onMounted(() => {
@@ -53,14 +53,14 @@ onMounted(() => {
       <button class="circle-button" @click="openPopup">+</button>
     </div>
 
-    <AddKpiPopup :show="showPopup" :kpi="kpi.filter((kpiItem: any) => !kpiItem.visible)" @close="closePopup" @confirm="confirmSelection" />
+    <AddKpiPopup :show="showPopup" :kpi="kpi" @close="closePopup" @confirm="confirmSelection" />
 
     <div class="items">
       <kpiBox
         v-for="(kpiItem, index) in kpi"
         :key="index"
         :kpi="kpiItem"
-        @toggle-visibility="toggleKpiVisibility(kpiItem.id)">
+        @remove-kpi="removeKpi(kpiItem.id)">
         <template #heading>{{ kpiItem.name }}</template>
         <template #content>
           {{ kpiItem.co2 }} Co² Verbrauch
