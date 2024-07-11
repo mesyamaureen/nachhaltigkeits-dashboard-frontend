@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard-item" :class="{ hidden: !kpi.visible }" @click="openPhaseView">
-    <div class="dashboard-item__content">
+    <div class="dashboard-item__content" :class="co2Class">
       <h3 class="dashboard-item__heading">
         <slot name="heading" />
       </h3>
@@ -13,9 +13,7 @@
 </template>
 
 <script lang="ts">
-// defineProps({
-//   kpi: Object
-// });
+import { computed } from 'vue';
 
 export default {
   props: {
@@ -28,7 +26,22 @@ export default {
     openPhaseView() {
       this.$router.push({ name: 'Phase' })
     }
-  }
+  },
+  setup(props) {
+    const co2Class = computed(() => {
+      if (props.kpi.co2 < 150) {
+        return 'green';
+      } else if (props.kpi.co2 >= 150 && props.kpi.co2 < 800) {
+        return 'yellow';
+      } else {
+        return 'red';
+      }
+    });
+
+    return {
+      co2Class,
+    };
+  },
 }
 
 </script>
@@ -68,6 +81,21 @@ export default {
   margin-right: 1rem;
   padding-right: 2rem;
   padding-top: 2rem;
+}
+
+.green .dashboard-item__content {
+  background-color: green;
+  color: white;
+}
+
+.yellow .dashboard-item__content {
+  background-color: yellow;
+  color: black;
+}
+
+.red .dashboard-item__content {
+  background-color: red;
+  color: white;
 }
 
 .dashboard-item__heading {
