@@ -1,17 +1,17 @@
 <template>
-  <div class="chart-item">
-    <div class="chart-item__content">
-      <h3 class="chart-item__heading">
-        <slot name="heading" />
-      </h3>
-      <div class="chart-item__description">
-        <slot name="content" />
-        <div>
-          <Bar :data="datacollection" :options="options" />
+  <div>
+    <div v-for="(chart, index) in charts" :key="index" class="chart-item">
+      <div class="chart-item__content">
+        <h3 class="chart-item__heading">{{ chart.heading }}</h3>
+        <div class="chart-item__description">
+          {{ chart.content }}
+          <div>
+            <Bar :data="chart.data" :options="chart.options" />
+          </div>
         </div>
       </div>
+      <button class="chart-item__button" @click="removeChart(index)">X</button>
     </div>
-    <button class="chart-item__button" @click="$emit('toggle-visibility')">X</button>
   </div>
 </template>
 
@@ -36,33 +36,77 @@ export default {
   },
   data() {
     return {
-      datacollection: {
-        labels: [
-          'January',
-          'February',
-          'March',
-          'April',
-          'May',
-          'June',
-          'July',
-          'August',
-          'September',
-          'October',
-          'November',
-          'December'
-        ],
-        datasets: [
-          {
-            label: 'Data One',
-            backgroundColor: '#f87979',
-            data: [40, 20, 12, 39, 10, 40, 39, 80, 40, 20, 12, 11]
+      charts: [
+        {
+          heading: 'Chart 1',
+          content: 'Description for chart 1',
+          data: {
+            labels: [
+              'January',
+              'February',
+              'March',
+              'April',
+              'May',
+              'June',
+              'July',
+              'August',
+              'September',
+              'October',
+              'November',
+              'December'
+            ],
+            datasets: [
+              {
+                label: 'Data One',
+                backgroundColor: '#f87979',
+                data: [40, 20, 12, 39, 10, 40, 39, 80, 40, 20, 12, 11]
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false
           }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false
-      }
+        }
+      ]
+    }
+  },
+  methods: {
+    addChart() {
+      this.charts.push({
+        heading: `Chart ${this.charts.length + 1}`,
+        content: `Description for chart ${this.charts.length + 1}`,
+        data: {
+          labels: [
+            'January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'December'
+          ],
+          datasets: [
+            {
+              label: 'Data One',
+              backgroundColor: '#f87979',
+              data: [40, 20, 12, 39, 10, 40, 39, 80, 40, 20, 12, 11]
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      })
+    },
+    removeChart(index: number) {
+      this.charts.splice(index, 1)
     }
   }
 }
@@ -75,7 +119,7 @@ export default {
   flex-direction: column;
   justify-content: space-between;
   width: fit-content;
-  height: 200px; /* Fix height for all cards */
+  height: fit-content;
   margin-top: 2rem;
   border: 2px solid grey;
   border-radius: 2px;
