@@ -43,15 +43,17 @@ export default {
   data() {
     return {
       showPopup: false,
-      charts: []
+      charts: [],
+      chartCounter: 1 // Initialize chart counter
+
     }
   },
 
   methods: {
     addChart(chartType: string) {
       this.charts.push({
-        heading: `Chart ${this.charts.length + 1}`,
-        content: `Description for chart ${this.charts.length + 1}`,
+        heading: `Chart ${this.chartCounter}`,
+        content: `Description for chart ${this.chartCounter}`,
         type: chartType,
         data: {
           labels: [
@@ -81,6 +83,7 @@ export default {
           maintainAspectRatio: false
         }
       });
+      this.chartCounter++; // Increment chart counter
       this.showPopup = false;
     },
     removeChart(index: number) {
