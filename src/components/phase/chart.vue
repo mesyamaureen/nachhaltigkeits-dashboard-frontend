@@ -1,21 +1,24 @@
 <template>
   <div>
+    <button class="circle-button" @click="showPopup = true">+</button>
     <div v-for="(chart, index) in charts" :key="index" class="chart-item">
       <div class="chart-item__content">
         <h3 class="chart-item__heading">{{ chart.heading }}</h3>
         <div class="chart-item__description">
           {{ chart.content }}
           <div>
-            <Bar :data="chart.data" :options="chart.options" />
+            <Bar v-if="chart.type === 'bar'" :data="chart.data" :options="chart.options" />
           </div>
         </div>
       </div>
       <button class="chart-item__button" @click="removeChart(index)">X</button>
     </div>
+    <AddChartPopup v-if="showPopup" @close="showPopup = false" @add-chart="addChart" />
   </div>
 </template>
 
 <script lang="ts">
+import AddChartPopup from '@/components/phase/AddChartPopup.vue';
 import {
   Chart as ChartJS,
   Title,
@@ -32,50 +35,22 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 export default {
   components: {
-    Bar
+    Bar,
+    AddChartPopup
   },
   data() {
     return {
-      charts: [
-        {
-          heading: 'Chart 1',
-          content: 'Description for chart 1',
-          data: {
-            labels: [
-              'January',
-              'February',
-              'March',
-              'April',
-              'May',
-              'June',
-              'July',
-              'August',
-              'September',
-              'October',
-              'November',
-              'December'
-            ],
-            datasets: [
-              {
-                label: 'Data One',
-                backgroundColor: '#f87979',
-                data: [40, 20, 12, 39, 10, 40, 39, 80, 40, 20, 12, 11]
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false
-          }
-        }
-      ]
+      showPopup: false,
+      charts: []
     }
   },
+
   methods: {
-    addChart() {
+    addChart(chartType: string) {
       this.charts.push({
         heading: `Chart ${this.charts.length + 1}`,
         content: `Description for chart ${this.charts.length + 1}`,
+        type: chartType,
         data: {
           labels: [
             'January',
@@ -94,7 +69,7 @@ export default {
           datasets: [
             {
               label: 'Data One',
-              backgroundColor: '#f87979',
+              backgroundColor: chartType === 'bar' ? '#f87979' : '#0000ff',
               data: [40, 20, 12, 39, 10, 40, 39, 80, 40, 20, 12, 11]
             }
           ]
@@ -103,10 +78,11 @@ export default {
           responsive: true,
           maintainAspectRatio: false
         }
-      })
+      });
+      this.showPopup = false;
     },
     removeChart(index: number) {
-      this.charts.splice(index, 1)
+      this.charts.splice(index, 1);
     }
   }
 }
@@ -191,5 +167,32 @@ export default {
     width: 50px;
     height: 50px;
   }
+}
+.circle-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
+  height: 50px;
+  background-color: #000000;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s, transform 0.3s;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.circle-button:hover {
+  background-color: #0056b3;
+  transform: scale(1.1);
+}
+
+.circle-button:active {
+  transform: scale(0.9);
 }
 </style>
