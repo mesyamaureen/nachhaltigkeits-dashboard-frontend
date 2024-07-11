@@ -1,21 +1,26 @@
 <template>
   <div>
-    <div v-for="(chart, index) in charts" :key="index" class="chart-item">
-      <div class="chart-item__content">
-        <h3 class="chart-item__heading">{{ chart.heading }}</h3>
-        <div class="chart-item__description">
-          {{ chart.content }}
-          <div>
-            <Bar :data="chart.data" :options="chart.options" />
+    <button class="circle-button" @click="showPopup = true">+</button>
+    <div class="charts-container">
+      <div v-for="(chart, index) in charts" :key="index" class="chart-item">
+        <div class="chart-item__content">
+          <h3 class="chart-item__heading">{{ chart.heading }}</h3>
+          <div class="chart-item__description">
+            {{ chart.content }}
+            <div>
+              <Bar v-if="chart.type === 'bar'" :data="chart.data" :options="chart.options" />
+            </div>
           </div>
         </div>
+        <button class="chart-item__button" @click="removeChart(index)">X</button>
       </div>
-      <button class="chart-item__button" @click="removeChart(index)">X</button>
     </div>
+    <AddChartPopup v-if="showPopup" @close="showPopup = false" @add-chart="addChart" />
   </div>
 </template>
 
 <script lang="ts">
+import AddChartPopup from '@/components/phase/AddChartPopup.vue';
 import {
   Chart as ChartJS,
   Title,
@@ -26,56 +31,56 @@ import {
   LinearScale
 } from 'chart.js'
 import { Bar } from 'vue-chartjs'
-// import * as chartConfig from './chartConfig.js'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
+
+interface ChartData {
+  labels: string[];
+  datasets: { label: string; backgroundColor: string; data: number[] }[];
+}
+
+interface Chart {
+  heading: string;
+  content: string;
+  type: string;
+  data: ChartData;
+  options: {
+    responsive: boolean;
+    maintainAspectRatio: boolean;
+  };
+}
+
+
 export default {
   components: {
-    Bar
+    Bar,
+    AddChartPopup
   },
   data() {
     return {
-      charts: [
-        {
-          heading: 'Chart 1',
-          content: 'Description for chart 1',
-          data: {
-            labels: [
-              'January',
-              'February',
-              'March',
-              'April',
-              'May',
-              'June',
-              'July',
-              'August',
-              'September',
-              'October',
-              'November',
-              'December'
-            ],
-            datasets: [
-              {
-                label: 'Data One',
-                backgroundColor: '#f87979',
-                data: [40, 20, 12, 39, 10, 40, 39, 80, 40, 20, 12, 11]
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false
-          }
-        }
-      ]
+      showPopup: false,
+      charts: [] as Chart[],
+      chartCounter: 1 // Initialize chart counter
+    }
+  },
+  created() {
+    // Laden der Charts aus dem LocalStorage
+    const storedCharts = localStorage.getItem('charts');
+    if (storedCharts) {
+      this.charts = JSON.parse(storedCharts) as Chart[];
+      this.chartCounter = this.charts.length ? Math.max(...this.charts.map(chart => parseInt(chart.heading.split(' ')[1]))) + 1 : 1;
     }
   },
   methods: {
-    addChart() {
+    saveCharts() {
+      localStorage.setItem('charts', JSON.stringify(this.charts));
+    },
+    addChart(chartType: string) {
       this.charts.push({
-        heading: `Chart ${this.charts.length + 1}`,
-        content: `Description for chart ${this.charts.length + 1}`,
+        heading: `Chart ${this.chartCounter}`,
+        content: `Description for chart ${this.chartCounter}`,
+        type: chartType,
         data: {
           labels: [
             'January',
@@ -94,7 +99,7 @@ export default {
           datasets: [
             {
               label: 'Data One',
-              backgroundColor: '#f87979',
+              backgroundColor: chartType === 'bar' ? '#f87979' : '#0000ff',
               data: [40, 20, 12, 39, 10, 40, 39, 80, 40, 20, 12, 11]
             }
           ]
@@ -103,16 +108,26 @@ export default {
           responsive: true,
           maintainAspectRatio: false
         }
-      })
+      });
+      this.chartCounter++; // Increment chart counter
+      this.saveCharts(); // Save charts to localStorage
+      this.showPopup = false;
     },
     removeChart(index: number) {
-      this.charts.splice(index, 1)
+      this.charts.splice(index, 1);
+      this.saveCharts(); // Save charts to localStorage
     }
   }
 }
 </script>
 
 <style scoped>
+.charts-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3rem; /* Optional: Adds space between chart items */
+}
+
 .chart-item {
   position: relative;
   display: flex;
@@ -126,9 +141,7 @@ export default {
   box-sizing: border-box;
   padding: 1rem;
   visibility: visible;
-  transition:
-    visibility 0.3s,
-    opacity 0.3s;
+  transition: visibility 0.3s, opacity 0.3s;
 }
 
 .chart-item.hidden {
@@ -191,5 +204,32 @@ export default {
     width: 50px;
     height: 50px;
   }
+}
+.circle-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
+  height: 50px;
+  background-color: #000000;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s, transform 0.3s;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.circle-button:hover {
+  background-color: #0056b3;
+  transform: scale(1.1);
+}
+
+.circle-button:active {
+  transform: scale(0.9);
 }
 </style>
