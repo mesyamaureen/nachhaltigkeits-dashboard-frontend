@@ -1,3 +1,27 @@
+<template>
+  <main class="content">
+    <div class="title">
+      <h1>Übersicht</h1>
+      <button class="circle-button" @click="openPopup">+</button>
+    </div>
+
+    <AddKpiPopup :show="showPopup" :kpi="availableKpi" @close="closePopup" @confirm="confirmSelection" />
+
+    <div class="items">
+      <kpiBox
+        v-for="(kpiItem, index) in kpi"
+        :key="index"
+        :kpi="kpiItem"
+        @remove-kpi="removeKpi(kpiItem.id)">
+        <template #heading>{{ kpiItem.name }}</template>
+        <template #content>
+          {{ kpiItem.co2 }} Co² Verbrauch
+        </template>
+      </kpiBox>
+    </div>
+  </main>
+</template>
+
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 // @ts-ignore
@@ -67,30 +91,6 @@ onMounted(() => {
   loadKpi();
 });
 </script>
-
-<template>
-  <main class="content">
-    <div class="title">
-      <h1>Übersicht</h1>
-      <button class="circle-button" @click="openPopup">+</button>
-    </div>
-
-    <AddKpiPopup :show="showPopup" :kpi="availableKpi" @close="closePopup" @confirm="confirmSelection" />
-
-    <div class="items">
-      <kpiBox
-        v-for="(kpiItem, index) in kpi"
-        :key="index"
-        :kpi="kpiItem"
-        @remove-kpi="removeKpi(kpiItem.id)">
-        <template #heading>{{ kpiItem.name }}</template>
-        <template #content>
-          {{ kpiItem.co2 }} Co² Verbrauch
-        </template>
-      </kpiBox>
-    </div>
-  </main>
-</template>
 
 <style scoped>
 header {
