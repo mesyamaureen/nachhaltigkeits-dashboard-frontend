@@ -21,21 +21,27 @@
 import { ref } from 'vue';
 import { defineProps, defineEmits } from 'vue';
 
-const props = defineProps({
-  show: Boolean,
-  kpi: Array
-});
+interface Kpi {
+  id: number;
+  name: string;
+  co2: number;
+}
+
+const props = defineProps<{
+  show: boolean;
+  kpi: Kpi[];
+}>();
 
 const emits = defineEmits(['close', 'confirm']);
 
-const selectedKpi = ref(null);
+const selectedKpi = ref<number | null>(null);
 
 const closePopup = () => {
   emits('close');
 };
 
 const confirmSelection = () => {
-  if (selectedKpi.value) {
+  if (selectedKpi.value !== null) {
     emits('confirm', selectedKpi.value);
   } else {
     alert('Bitte wählen Sie eine KPI aus.');

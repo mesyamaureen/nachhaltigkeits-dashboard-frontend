@@ -1,3 +1,73 @@
+<script setup lang="ts">
+import { ref, onMounted, computed } from 'vue';
+// @ts-ignore
+import { fetchKpi } from '@/api/api.js';
+import kpiBox from '@/components/kpiBox.vue';
+import AddKpiPopup from '@/components/AddKpiPopup.vue';
+
+interface Kpi {
+  id: number;
+  name: string;
+  co2: number;
+}
+
+const kpi = ref<Kpi[]>([]);
+const allKpi = ref<Kpi[]>([]);
+const showPopup = ref(false);
+
+const openPopup = () => {
+  showPopup.value = true;
+};
+
+const closePopup = () => {
+  showPopup.value = false;
+};
+
+const loadKpi = async () => {
+  try {
+    const fetchedKpi = await fetchKpi();
+    allKpi.value = fetchedKpi.map((kpiItem: Kpi) => ({ ...kpiItem }));
+    loadSelectedKpi();
+  } catch (error) {
+    console.error('Failed to load KPIs:', error);
+  }
+};
+
+const loadSelectedKpi = () => {
+  const selectedKpiIds = JSON.parse(localStorage.getItem('selectedKpi') || '[]');
+  kpi.value = allKpi.value.filter((kpiItem: Kpi) => selectedKpiIds.includes(kpiItem.id));
+};
+
+const saveSelectedKpi = () => {
+  const selectedKpiIds = kpi.value.map((kpiItem: Kpi) => kpiItem.id);
+  localStorage.setItem('selectedKpi', JSON.stringify(selectedKpiIds));
+};
+
+const removeKpi = (kpiId: number) => {
+  kpi.value = kpi.value.filter((kpiItem: Kpi) => kpiItem.id !== kpiId);
+  saveSelectedKpi();
+  console.log(`KPI ID: ${kpiId} removed`); // Debugging-Ausgabe
+};
+
+const confirmSelection = (kpiId: number) => {
+  const selectedKpi = allKpi.value.find((kpiItem: Kpi) => kpiItem.id === kpiId);
+  if (selectedKpi) {
+    kpi.value.push(selectedKpi);
+    saveSelectedKpi();
+    closePopup();
+  }
+};
+
+const availableKpi = computed(() => {
+  const selectedIds = kpi.value.map((kpiItem: Kpi) => kpiItem.id);
+  return allKpi.value.filter((kpiItem: Kpi) => !selectedIds.includes(kpiItem.id));
+});
+
+onMounted(() => {
+  loadKpi();
+});
+</script>
+
 <template>
   <main class="content">
     <div class="title">
@@ -22,60 +92,6 @@
   </main>
 </template>
 
-<script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
-// @ts-ignore
-import { fetchKpi } from '@/api/api.js';
-import kpiBox from '@/components/kpiBox.vue';
-import AddKpiPopup from '@/components/AddKpiPopup.vue';
-
-const kpi = ref([]);
-const allKpi = ref([]);
-const showPopup = ref(false);
-
-const openPopup = () => {
-  showPopup.value = true;
-};
-
-const closePopup = () => {
-  showPopup.value = false;
-};
-
-const loadKpi = async () => {
-  try {
-    const fetchedKpi = await fetchKpi();
-    allKpi.value = fetchedKpi.map((kpiItem: any) => ({ ...kpiItem }));
-    kpi.value.forEach((kpiItem: any) => {
-      console.log(`KPI ID: ${kpiItem.id}`); // Debugging-Ausgabe
-    });
-  } catch (error) {
-    console.error('Failed to load KPIs:', error);
-  }
-};
-
-const removeKpi = (kpiId: any) => {
-  kpi.value = kpi.value.filter((kpiItem: any) => kpiItem.id !== kpiId);
-  console.log(`KPI ID: ${kpiId} removed`); // Debugging-Ausgabe
-};
-
-const confirmSelection = (kpiId: any) => {
-  const selectedKpi = allKpi.value.find((kpiItem: any) => kpiItem.id === kpiId);
-  if (selectedKpi) {
-    kpi.value.push(selectedKpi);
-    closePopup();
-  }
-};
-
-const availableKpi = computed(() => {
-  const selectedIds = kpi.value.map((kpiItem: any) => kpiItem.id);
-  return allKpi.value.filter((kpiItem: any) => !selectedIds.includes(kpiItem.id));
-});
-
-onMounted(() => {
-  loadKpi();
-});
-</script>
-
 <style scoped>
 header {
   line-height: 1.5;
@@ -91,8 +107,8 @@ header {
 }
 
 .items {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1rem;
   margin-top: 2rem;
 }
