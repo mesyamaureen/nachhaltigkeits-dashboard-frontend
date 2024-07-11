@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
 import sidebarNav from '@/components/SidebarMenu.vue'
-import type dashboard from './components/cDashboard.vue'
+import type dashboard from '@/components/menü/cDashboard.vue'
 </script>
 
 
