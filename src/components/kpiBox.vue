@@ -58,7 +58,7 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  width: 300px;
+  width: 450px;
   height: 200px; /* Fix height for all cards */
   margin-top: 2rem;
   border: 0.5px solid;
