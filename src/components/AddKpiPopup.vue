@@ -6,7 +6,7 @@
       <div class="form-group">
         <label for="kpi-select">Wählen Sie eine KPI aus:</label>
         <select id="kpi-select" v-model="selectedKpi">
-          <option v-for="k in kpi as any" :key="k.id" :value="k.id">
+          <option v-for="k in kpi" :key="k.id" :value="k.id">
             {{ k.name }}
           </option>
         </select>
