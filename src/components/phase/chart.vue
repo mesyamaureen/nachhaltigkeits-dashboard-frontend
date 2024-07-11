@@ -2,19 +2,19 @@
   <div>
     <button class="circle-button" @click="showPopup = true">+</button>
     <div class="charts-container">
-    <div v-for="(chart, index) in charts" :key="index" class="chart-item">
-      <div class="chart-item__content">
-        <h3 class="chart-item__heading">{{ chart.heading }}</h3>
-        <div class="chart-item__description">
-          {{ chart.content }}
-          <div>
-            <Bar v-if="chart.type === 'bar'" :data="chart.data" :options="chart.options" />
+      <div v-for="(chart, index) in charts" :key="index" class="chart-item">
+        <div class="chart-item__content">
+          <h3 class="chart-item__heading">{{ chart.heading }}</h3>
+          <div class="chart-item__description">
+            {{ chart.content }}
+            <div>
+              <Bar v-if="chart.type === 'bar'" :data="chart.data" :options="chart.options" />
+            </div>
           </div>
         </div>
+        <button class="chart-item__button" @click="removeChart(index)">X</button>
       </div>
-      <button class="chart-item__button" @click="removeChart(index)">X</button>
     </div>
-  </div>
     <AddChartPopup v-if="showPopup" @close="showPopup = false" @add-chart="addChart" />
   </div>
 </template>
@@ -31,9 +31,26 @@ import {
   LinearScale
 } from 'chart.js'
 import { Bar } from 'vue-chartjs'
-// import * as chartConfig from './chartConfig.js'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
+
+
+interface ChartData {
+  labels: string[];
+  datasets: { label: string; backgroundColor: string; data: number[] }[];
+}
+
+interface Chart {
+  heading: string;
+  content: string;
+  type: string;
+  data: ChartData;
+  options: {
+    responsive: boolean;
+    maintainAspectRatio: boolean;
+  };
+}
+
 
 export default {
   components: {
@@ -43,13 +60,22 @@ export default {
   data() {
     return {
       showPopup: false,
-      charts: [],
+      charts: [] as Chart[],
       chartCounter: 1 // Initialize chart counter
-
     }
   },
-
+  created() {
+    // Laden der Charts aus dem LocalStorage
+    const storedCharts = localStorage.getItem('charts');
+    if (storedCharts) {
+      this.charts = JSON.parse(storedCharts) as Chart[];
+      this.chartCounter = this.charts.length ? Math.max(...this.charts.map(chart => parseInt(chart.heading.split(' ')[1]))) + 1 : 1;
+    }
+  },
   methods: {
+    saveCharts() {
+      localStorage.setItem('charts', JSON.stringify(this.charts));
+    },
     addChart(chartType: string) {
       this.charts.push({
         heading: `Chart ${this.chartCounter}`,
@@ -84,17 +110,18 @@ export default {
         }
       });
       this.chartCounter++; // Increment chart counter
+      this.saveCharts(); // Save charts to localStorage
       this.showPopup = false;
     },
     removeChart(index: number) {
       this.charts.splice(index, 1);
+      this.saveCharts(); // Save charts to localStorage
     }
   }
 }
 </script>
 
 <style scoped>
-
 .charts-container {
   display: flex;
   flex-wrap: wrap;
