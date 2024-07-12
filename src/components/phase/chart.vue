@@ -20,6 +20,7 @@
 </template>
 
 <script lang="ts">
+import { defineComponent, ref } from 'vue';
 import AddChartPopup from '@/components/phase/AddChartPopup.vue';
 import {
   Chart as ChartJS,
@@ -31,9 +32,21 @@ import {
   LinearScale
 } from 'chart.js'
 import { Bar } from 'vue-chartjs'
+// @ts-ignore
+import { fetchOrganisatorisch } from '@/api/api.js';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
+interface Organisatorisch {
+  id: number;
+  datum: string;
+  zeit: string;
+  dauer: number;
+  transportweg: string;
+  anlass: string;
+  energieverbrauch: number | null;
+  evTransportweg: number | null;
+}
 
 interface ChartData {
   labels: string[];
@@ -41,7 +54,7 @@ interface ChartData {
 }
 
 interface Chart {
-  heading: string;
+  heading?: string;
   content: string;
   type: string;
   data: ChartData;
@@ -51,74 +64,72 @@ interface Chart {
   };
 }
 
-
-export default {
+export default defineComponent({
   components: {
     Bar,
     AddChartPopup
   },
-  data() {
+  setup() {
+    const showPopup = ref(false);
+    const charts = ref<Chart[]>([]);
+    const chartCounter = ref(1);
+
+    const saveCharts = () => {
+      localStorage.setItem('charts', JSON.stringify(charts.value));
+    };
+
+    const addChart = async ({ chartType, anlass }: { chartType: string; anlass: string }) => {
+      try {
+        const data: Organisatorisch[] = await fetchOrganisatorisch();
+        const filteredData = data.filter(item => item.anlass === anlass);
+
+        const labels = Array.from(new Set(filteredData.map(item => new Date(item.datum).toLocaleDateString('en-GB', { month: 'long' }))));
+
+        const energieverbrauchData = labels.map(label => {
+          const monthlyData = filteredData.filter(item => new Date(item.datum).toLocaleDateString('en-GB', { month: 'long' }) === label);
+          return monthlyData.reduce((sum, item) => sum + (item.energieverbrauch || 0), 0);
+        });
+
+        charts.value.push({
+          content: `Energieverbrauch für ${anlass}`,
+          type: chartType,
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: 'Energieverbrauch',
+                backgroundColor: chartType === 'bar' ? '#f87979' : '#0000ff',
+                data: energieverbrauchData
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false
+          }
+        });
+
+        chartCounter.value++;
+        saveCharts();
+        showPopup.value = false;
+      } catch (error) {
+        console.error('Error adding chart:', error);
+      }
+    };
+
+    const removeChart = (index: number) => {
+      charts.value.splice(index, 1);
+      saveCharts();
+    };
+
     return {
-      showPopup: false,
-      charts: [] as Chart[],
-      chartCounter: 1 // Initialize chart counter
-    }
-  },
-  created() {
-    // Laden der Charts aus dem LocalStorage
-    const storedCharts = localStorage.getItem('charts');
-    if (storedCharts) {
-      this.charts = JSON.parse(storedCharts) as Chart[];
-      this.chartCounter = this.charts.length ? Math.max(...this.charts.map(chart => parseInt(chart.heading.split(' ')[1]))) + 1 : 1;
-    }
-  },
-  methods: {
-    saveCharts() {
-      localStorage.setItem('charts', JSON.stringify(this.charts));
-    },
-    addChart(chartType: string) {
-      this.charts.push({
-        heading: `Chart ${this.chartCounter}`,
-        content: `Description for chart ${this.chartCounter}`,
-        type: chartType,
-        data: {
-          labels: [
-            'January',
-            'February',
-            'March',
-            'April',
-            'May',
-            'June',
-            'July',
-            'August',
-            'September',
-            'October',
-            'November',
-            'December'
-          ],
-          datasets: [
-            {
-              label: 'Data One',
-              backgroundColor: chartType === 'bar' ? '#f87979' : '#0000ff',
-              data: [40, 20, 12, 39, 10, 40, 39, 80, 40, 20, 12, 11]
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false
-        }
-      });
-      this.chartCounter++; // Increment chart counter
-      this.saveCharts(); // Save charts to localStorage
-      this.showPopup = false;
-    },
-    removeChart(index: number) {
-      this.charts.splice(index, 1);
-      this.saveCharts(); // Save charts to localStorage
-    }
+      showPopup,
+      charts,
+      addChart,
+      removeChart
+    };
   }
-}
+});
 </script>
 
 <style scoped>

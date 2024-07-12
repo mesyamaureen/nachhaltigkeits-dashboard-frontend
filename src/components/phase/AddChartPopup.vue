@@ -1,36 +1,112 @@
 <template>
-    <div class="popup-overlay">
-      <div class="popup-content">
-        <button class="close-button" @click="$emit('close')">X</button>
-        <h3>Select Chart Type</h3>
-        <div class="form-group">
-          <label for="chart-select">Wählen Sie einen Chart-Typ aus:</label>
-          <select id="chart-select" v-model="selectedChartType">
-            <option value="bar">Bar Chart</option>
-          </select>
-        </div>
-        <button class="confirm-button" @click="addChart">Hinzufügen</button>
-        <button class="cancel-button" @click="$emit('close')">Abbrechen</button>
+  <div class="popup-overlay">
+    <div class="popup-content">
+      <button class="close-button" @click="$emit('close')">X</button>
+      <h3>Select Chart Type</h3>
+      <div class="form-group">
+        <label for="chart-select">Wählen Sie einen Chart-Typ aus:</label>
+        <select id="chart-select" v-model="selectedChartType">
+          <option value="bar">Bar Chart</option>
+        </select>
       </div>
+      <div class="form-group">
+        <label for="anlass-select">Wählen Sie eine Anlass-Kategorie aus:</label>
+        <select id="anlass-select" v-model="selectedAnlass">
+          <option v-for="anlass in uniqueAnlass" :key="anlass" :value="anlass">{{ anlass }}</option>
+        </select>
+      </div>
+      <button class="confirm-button" @click="addChart">Hinzufügen</button>
+      <button class="cancel-button" @click="$emit('close')">Abbrechen</button>
     </div>
-  </template>
-  
-  <script lang="ts">
-  export default {
-    data() {
-      return {
-        selectedChartType: 'bar'
+  </div>
+</template>
+
+<script lang="ts">
+import { defineComponent, ref, onMounted, computed } from 'vue';
+// @ts-ignore
+import { fetchOrganisatorisch } from '@/api/api.js';
+
+interface organisatorischData {
+  id: number;
+  datum: Date;
+  zeit: string;
+  dauer: number;
+  transportweg: string;
+  anlass: string;
+  energieverbrauch: number | null;
+  evTransportweg:number | null;
+}
+// const props = defineProps<{
+//   show: boolean;
+//   organisatorischData: organisatorischData[];
+// }>();
+// export default {
+//   data() {
+//     return {
+//       selectedChartType: 'bar',
+//       organisatorischData: []
+//     }
+//   },
+//   async created() {
+//     try {
+//       const data = await fetchOrganisatorisch()
+//       this.organisatorischData = data
+//     } catch (error) {
+//       console.error('Error fetching organisatorisch data:', error)
+//     }
+//   },
+//   methods: {
+//     addChart() {
+//       this.$emit('add-chart', this.selectedChartType)
+//     }
+//   }
+// }
+export default defineComponent({
+  name: 'AddChartPopup',
+  emits: ['close', 'add-chart'],
+  setup(_, { emit }) {
+    const selectedChartType = ref('bar');
+    const organisatorisch = ref<organisatorischData[]>([]);
+    const selectedAnlass = ref<string | null>(null);
+
+    const loadOrganisatorisch = async () => {
+      try {
+        organisatorisch.value = await fetchOrganisatorisch();
+      } catch (error) {
+        console.error('Failed to load organisatorisch:', error);
       }
-    },
-    methods: {
-      addChart() {
-        this.$emit('add-chart', this.selectedChartType);
+    };
+
+    const uniqueAnlass = computed(() => {
+      const anlassSet = new Set<string>();
+      organisatorisch.value.forEach(item => {
+        anlassSet.add(item.anlass);
+      });
+      return Array.from(anlassSet);
+    });
+
+    onMounted(() => {
+      loadOrganisatorisch();
+    });
+
+    const addChart = () => {
+      if (selectedAnlass.value) {
+        emit('add-chart', { chartType: selectedChartType.value, anlass: selectedAnlass.value });
       }
-    }
-  }
-  </script>
-  
-  <style scoped>
+    };
+
+    return {
+      selectedChartType,
+      organisatorisch,
+      selectedAnlass,
+      uniqueAnlass,
+      addChart,
+    };
+  },
+});
+</script>
+
+<style scoped>
 .popup-overlay {
   position: fixed;
   top: 0;
@@ -41,7 +117,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* Ensure the popup is in the foreground */
+  z-index: 1000;
 }
 
 .popup-content {
