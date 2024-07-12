@@ -1,10 +1,12 @@
 <script lang="ts">
 import Chart from '@/components/phase/chart.vue'
+import Entwicklungshistorie from '@/components/phase/entwicklungshistorie.vue'
 
 export default {
   name: 'Phase',
   components: {
-    Chart
+    Chart,
+    Entwicklungshistorie
   }
 }
 
@@ -16,6 +18,7 @@ export default {
     <div class="content">
       <h1>Planungsphase</h1>
       <!-- Glue kleine Kachel Component here -->
+      <Entwicklungshistorie />
       <Chart />
     </div>
   </div>
